@@ -1,8 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { categories, posts } from '@/lib/data';
+import { categories } from '@/lib/data';
+import { listPosts } from '@/lib/posts-store';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpinger.com';
+  const posts = await listPosts('published');
   return [
     { url: baseUrl, lastModified: new Date() },
     { url: `${baseUrl}/admin`, lastModified: new Date() },

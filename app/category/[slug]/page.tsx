@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation';
-import { categories, getCategory, posts } from '@/lib/data';
+import { categories, getCategory } from '@/lib/data';
+import { listPosts } from '@/lib/posts-store';
 import { PostCard } from '@/components/PostCard';
 
 type Props = { params: Promise<{ slug: string }> };
+
+export const dynamic = 'force-dynamic';
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -12,6 +15,7 @@ export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const category = getCategory(slug);
   if (!category) notFound();
+  const posts = await listPosts('published');
   const filtered = posts.filter((post) => post.category === category.name);
   return (
     <main className="container">

@@ -8,8 +8,14 @@ XPinger는 한국의 오늘 이슈를 감지하고 AI가 블로그 초안과 이
 - clobe.ai 느낌의 미니멀 카드형 UI
 - 메인 페이지, 카테고리 페이지, 글 상세 페이지
 - 관리자 페이지 `/admin`
+- OpenAI 기반 초안 생성 API `/api/generate-draft`
+- 초안 저장 API `/api/posts`
+- 발행 API `/api/posts/[slug]/publish`
+- 광고 관리 API `/api/ads`
+- 광고 슬롯 2곳
+  - 메인 상단 배너
+  - 글 본문 중간 광고
 - mock 트렌드 API `/api/trends`
-- mock 초안 생성 API `/api/generate-draft`
 - SEO 메타데이터, sitemap, robots
 
 ## 실행
@@ -27,20 +33,41 @@ npm run dev
 
 ```bash
 OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
+
 NAVER_CLIENT_ID=
 NAVER_CLIENT_SECRET=
-DATABASE_URL=
 NEXT_PUBLIC_SITE_URL=https://xpinger.com
+CRON_SECRET=change-me
+ADMIN_USER=admin
+ADMIN_PASSWORD=change-this-password
 ```
 
-## 다음 단계
+### Supabase 저장/발행
 
-1. OpenAI/Claude 실제 글 생성 연결
-2. Supabase DB 연결
-3. 이미지 생성 API 연결
-4. Vercel 배포
-5. Hostinger DNS에서 xpinger.com 연결
+관리자에서 초안을 저장하고 발행하려면 Supabase가 필요합니다.
+
+1. Supabase 프로젝트 생성
+2. SQL Editor에서 `supabase/schema.sql` 실행
+3. Vercel Production 환경변수에 추가
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+4. 재배포
+
+`DATABASE_URL`만으로는 현재 앱의 저장 기능이 동작하지 않습니다. 런타임 저장은 Supabase REST API를 사용하므로 `SUPABASE_URL`과 `SUPABASE_SERVICE_ROLE_KEY`가 필요합니다.
+
+## 광고 관리
+
+관리자 페이지의 “광고 관리” 탭에서 2개 광고를 조정합니다.
+
+- 상단 광고: 메인 Hero 아래
+- 본문 중간 광고: 글 상세 본문 중간
+
+HTML 코드 입력란에 AdSense/제휴 배너 코드를 넣으면 기본 문구 대신 표시됩니다. 광고 HTML은 관리자만 수정할 수 있게 운영 환경에서는 반드시 `ADMIN_PASSWORD`를 설정하세요.
 
 ## 배포 메모
 
@@ -57,7 +84,7 @@ CNAME: www -> cname.vercel-dns.com
 
 ## 관리자 페이지 보호
 
-`/admin`은 Basic Auth로 보호할 수 있습니다. Vercel 환경변수에 아래 값을 추가하세요.
+`/admin`, `/api/posts/*`, `/api/ads`는 Basic Auth로 보호할 수 있습니다. Vercel 환경변수에 아래 값을 추가하세요.
 
 ```txt
 ADMIN_USER=admin

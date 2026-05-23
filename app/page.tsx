@@ -1,10 +1,18 @@
 import Link from 'next/link';
-import { categories, posts, trends } from '@/lib/data';
+import { categories, trends } from '@/lib/data';
+import { listPosts } from '@/lib/posts-store';
+import { listAds } from '@/lib/ads-store';
+import { AdSlot } from '@/components/AdSlot';
 import { PostCard } from '@/components/PostCard';
 import { TrendList } from '@/components/TrendList';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const [posts, ads] = await Promise.all([listPosts('published'), listAds()]);
   const [featured, ...rest] = posts;
+  const topAd = ads.find((ad) => ad.id === 'top-banner');
+
   return (
     <main>
       <section className="hero container">
@@ -13,9 +21,11 @@ export default function HomePage() {
         <p>XPinger는 뉴스, 검색 흐름, 공식 자료를 바탕으로 매일의 핵심 키워드를 감지하고 블로그 초안과 대표 이미지를 자동 생성하는 AI 트렌드 블로그입니다.</p>
         <div className="hero-actions">
           <Link className="btn" href="/admin">오늘 이슈 분석하기 →</Link>
-          <Link className="btn secondary" href="/post/national-growth-fund-explained">샘플 글 보기</Link>
+          <Link className="btn secondary" href={featured ? `/post/${featured.slug}` : '/admin'}>최신 글 보기</Link>
         </div>
       </section>
+
+      <section className="container"><AdSlot ad={topAd} /></section>
 
       <section className="section container">
         <div className="section-head">
@@ -34,10 +44,14 @@ export default function HomePage() {
             <p className="subtle">초안은 AI가 만들고, 중요한 이슈는 사람 검토 후 발행합니다.</p>
           </div>
         </div>
-        <div className="grid posts">
-          <PostCard post={featured} large />
-          <div className="grid">{rest.map((post) => <PostCard key={post.slug} post={post} />)}</div>
-        </div>
+        {featured ? (
+          <div className="grid posts">
+            <PostCard post={featured} large />
+            <div className="grid">{rest.map((post) => <PostCard key={post.slug} post={post} />)}</div>
+          </div>
+        ) : (
+          <div className="card card-pad"><p className="subtle">아직 발행된 글이 없습니다. 관리자에서 초안을 저장하고 발행해보세요.</p></div>
+        )}
       </section>
 
       <section className="section container">
