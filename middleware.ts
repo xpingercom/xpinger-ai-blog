@@ -31,5 +31,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/posts/:path*', '/api/ads/:path*'],
+  matcher: ['/admin/:path*', '/api/posts/:path*', '/api/ads/:path*', '/api/generate-draft', '/api/cron/:path*'],
 };
